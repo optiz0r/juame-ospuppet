@@ -337,6 +337,9 @@ The server to send transaction reports to. Only set if parameter is defined. Oth
 
 The environment Puppet is running in. Valid options: a string. Default: `production`
 
+Note: this parameter sets the environment parameter in both the `[main]` and `[agent]` sections of `puppet.conf` which may not be what you want unless you're running puppet in masterless mode. Specifically, this requires the environment you set here to be present in the code directory (e.g. `/etc/puppetlabs/code/environments/`), or other puppet commands such as facts or config may stop working. If you just want to set the environment used by the agent to request a catalog, use the
+`custom_settings` parameter instead to set `environment` for just the agent section of the config file (see the example below).
+
 ##### `priority`
 
 The scheduling priority of the process. Only set if parameter is defined. Otherwise using puppet defaults. Valid options: an integer. Default: `undef`
@@ -359,7 +362,19 @@ Whether to send the process into the background. Valid options: a boolean. Defau
 
 ##### `custom_settings`
 
-A hash for any setting in the `puppet.conf`, section `[agent]`. Valid options: a hash containing a hash with a title, valid parameters and values. Default: `{}` (empty hash).
+A hash for any setting in the `puppet.conf`, section `[agent]`. Valid options: a hash containing a hash with a title, valid parameters and values. Default: `{}` (empty hash). For example:
+
+```
+class { '::ospuppet::agent':
+  custom_settings => {
+    'ospuppet::agent::config::settings.agent.environment' => {
+      'ensure'  => 'present',
+      'setting' => 'environment',
+      'value'   => 'qa',
+    },
+  }
+}
+```
 
 #### ::ospuppet::master
 
